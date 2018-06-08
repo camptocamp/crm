@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_crm_lead2opportunity_partner_inherit" model="ir.ui.view">
+        <field name="name">crm.lead2opportunity.partner.form.inherit</field>
+        <field name="model">crm.lead2opportunity.partner</field>
+        <field name="inherit_id" ref="crm.view_crm_lead2opportunity_partner" />
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='action']" position="attributes">
+                <attribute name="attrs">{'invisible': [('name', 'not in', ['convert', 'convert_create_project'])]}</attribute>
+            </xpath>
+            <xpath expr="//group[@name='action']" position="after">
+                <group name="project_action" attrs="{'invisible': [('name', '!=', 'convert_create_project')]}" string="Project">
+                    <field name="use_tasks" />
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>
