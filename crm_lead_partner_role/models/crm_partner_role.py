@@ -7,8 +7,8 @@ from odoo import models, fields
 class CrmPartnerRole(models.Model):
     _name = 'crm.partner.role'
 
-    partner_id = fields.Many2one('res.partner')
+    partner_id = fields.Many2one('res.partner', string='Partner')
 
-    role_id = fields.Many2one('crm.role')
+    role_id = fields.Many2one('crm.role', string='Role')
 
     crm_lead_id = fields.Many2one('crm.lead')
