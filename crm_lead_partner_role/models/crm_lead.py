@@ -10,5 +10,6 @@ class CrmLead(models.Model):
 
     partner_role_ids = fields.One2many(
         'crm.partner.role',
-        inverse_name='crm_lead_id'
+        inverse_name='crm_lead_id',
+        help='Partners involved on this lead and their roles.'
     )

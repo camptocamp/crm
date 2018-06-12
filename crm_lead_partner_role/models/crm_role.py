@@ -7,5 +7,6 @@ from odoo import models, fields
 class CrmRole(models.Model):
 
     _name = 'crm.role'
+    _description = 'CRM Role'
 
     name = fields.Char(required=True)

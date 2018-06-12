@@ -6,6 +6,7 @@ from odoo import models, fields
 
 class CrmPartnerRole(models.Model):
     _name = 'crm.partner.role'
+    _description = 'Lead partners and roles'
 
     partner_id = fields.Many2one('res.partner', string='Partner')
 
