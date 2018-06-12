@@ -21,7 +21,7 @@ class CrmLead(models.Model):
             'view_mode': 'form',
             'view_id': self.env.ref('project.edit_project').id,
             'res_id': self.project_id.id,
-            'context': "{'remove_create_button': True}"
+            'context': {'remove_create_button': True}
         }
 
     @api.model

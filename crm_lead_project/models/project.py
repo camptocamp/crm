@@ -22,7 +22,7 @@ class ProjectProject(models.Model):
             'view_mode': 'form',
             'view_id': self.env.ref('crm.crm_case_form_view_oppor').id,
             'res_id': self.lead_id.id,
-            'context': "{'remove_create_button': True}"
+            'context': {'remove_create_button': True}
         }
 
     @api.model

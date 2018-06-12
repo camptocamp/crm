@@ -30,9 +30,6 @@ class Lead2OpportunityPartner(models.TransientModel):
 
         if self.name != 'convert_create_project':
             return super(Lead2OpportunityPartner, self).action_apply()
-        # TODO Check if really needed
-        if len(self.env.context.get('active_ids')) > 1:
-            raise UserError(_('Cannot create project with two leads.'))
         # Prepare opportunity conversion as it's done by odoo
         values = {
             'team_id': self.team_id.id,
@@ -45,7 +42,26 @@ class Lead2OpportunityPartner(models.TransientModel):
         values.update({'lead_ids': leads.ids, 'user_ids': [self.user_id.id]})
         self._convert_opportunity(values)
         # Create the project
-        project_values = self._prepare_project_values(leads)
-        project = self.env['project.project'].create(project_values)
-        leads.write({'project_id': project.id})
+        for lead in leads:
+            project_values = self._prepare_project_values(leads)
+            if self.env.user.has_group(
+                    'project.project.group_project_manager'):
+                project = self.env['project.project'].create(project_values)
+            else:
+                project = self.env['project.project'].sudo().create(
+                    project_values)
+            lead.write({'project_id': project.id})
         return leads.redirect_opportunity_view()
+
+
+class Lead2OpportunityMassConvert(models.TransientModel):
+
+    _inherit = 'crm.lead2opportunity.partner.mass'
+
+    @api.onchange('name')
+    def _onchange_name(self):
+        """Restrict deduplication if a project is to create."""
+        if self.name == 'convert_create_project':
+            self.deduplicate = False
+        else:
+            self.deduplicate = True
