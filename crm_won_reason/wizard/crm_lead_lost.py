@@ -9,5 +9,5 @@ class CrmLeadLost(models.TransientModel):
     _inherit = "crm.lead.lost"
 
     lost_reason_id = fields.Many2one(
-        "crm.lost.reason", domain="[('reason_type','=','lost')]"
+        "crm.lost.reason", domain="[('reason_type','in',[False,'lost'])]"
     )

@@ -2,7 +2,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
 {
-    "name": "CRM win reason",
+    "name": "CRM won reason",
     "version": "15.0.1.0.0",
     "category": "Customer Relationship Management",
     "author": "Camptocamp, Odoo Community Association (OCA)",
