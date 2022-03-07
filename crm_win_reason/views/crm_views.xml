@@ -5,13 +5,9 @@
     </record>
 
     <!-- Rename menuitem -->
-    <menuitem
-        id="crm.menu_crm_lost_reason"
-        name="Win or Lost Reasons"
-        parent="crm.menu_crm_config_lead"
-        action="crm.crm_lost_reason_action"
-        sequence="6"
-    />
+    <record id="crm.menu_crm_lost_reason" model="ir.ui.menu">
+        <field name="name">Win or Lost Reasons</field>
+    </record>
 
     <record id="crm_lost_reason_view_tree" model="ir.ui.view">
         <field name="name">crm.lost.reason.tree.inherit</field>

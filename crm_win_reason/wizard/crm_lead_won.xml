@@ -4,9 +4,9 @@
         <field name="name">crm.lead.won.form</field>
         <field name="model">crm.lead.won</field>
         <field name="arch" type="xml">
-            <form string="Win Reason">
+            <form string="Won Reason">
                 <group class="oe_title">
-                    <field name="win_reason_id" options="{'no_create_edit': True}" />
+                    <field name="won_reason_id" options="{'no_create_edit': True}" />
                 </group>
                 <footer>
                     <button

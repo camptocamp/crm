@@ -8,10 +8,10 @@ class CrmLeadReason(models.TransientModel):
     _name = "crm.lead.won"
     _description = "Get Won Reason"
 
-    win_reason_id = fields.Many2one(
-        "crm.lost.reason", "Won Reason", domain="[('reason_type','=','won')]"
+    won_reason_id = fields.Many2one(
+        "crm.lost.reason", "Won Reason", domain="[('reason_type','in',[False,'won'])]"
     )
 
     def action_win_reason_apply(self):
         leads = self.env["crm.lead"].browse(self.env.context.get("active_ids"))
-        return leads.action_set_won(win_reason_id=self.win_reason_id.id)
+        return leads.action_set_won(won_reason_id=self.won_reason_id.id)

@@ -7,6 +7,4 @@ from odoo import fields, models
 class CrmLostReason(models.Model):
     _inherit = "crm.lost.reason"
 
-    reason_type = fields.Selection(
-        [("won", "Won"), ("lost", "Lost")],
-    )
+    reason_type = fields.Selection([("won", "Won"), ("lost", "Lost")], default="lost")
