@@ -1,7 +1,7 @@
 # Copyright 2022 Camptocamp SA
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 
@@ -15,7 +15,7 @@ class Opportunity2Rfq(models.TransientModel):
 
         active_model = self._context.get("active_model")
         if active_model != "crm.lead":
-            raise UserError(_("You can only apply this action from a lead."))
+            raise UserError(self.env._("You can only apply this action from a lead."))
 
         lead = False
         if result.get("lead_id"):
