@@ -4,7 +4,7 @@
 
 {
     "name": "SRM",
-    "version": "14.0.1.0.0",
+    "version": "18.0.1.0.0",
     "author": "Camptocamp, Odoo Community Association (OCA)",
     "summary": "Use CRM model for suppliers",
     "license": "AGPL-3",
@@ -14,7 +14,6 @@
         "crm",
         "sale_crm",
         "purchase",
-        "crm_enterprise",
     ],
     "website": "https://github.com/OCA/crm",
     "data": [

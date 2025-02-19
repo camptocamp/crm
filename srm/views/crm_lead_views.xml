@@ -16,18 +16,4 @@
                 'search_default_assigned_to_me': 1,
         }</field>
     </record>
-
-    <!-- dashboard action -->
-    <record id="crm_enterprise.crm_lead_action_dashboard" model="ir.actions.act_window">
-        <field
-            name="domain"
-        >['&amp;', ('request_type','in',(False,'customer')), '|', ('active','=',True), ('active','=',False)]</field>
-    </record>
-
-    <record
-        id="crm_enterprise.crm_opportunity_action_dashboard"
-        model="ir.actions.act_window"
-    >
-        <field name="domain">[('request_type','in',(False,'customer'))]</field>
-    </record>
 </odoo>
