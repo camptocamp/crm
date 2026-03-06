@@ -3,6 +3,7 @@
 from collections import defaultdict
 
 from odoo import api, fields, models
+from odoo.fields import Domain
 
 
 class CrmLead(models.Model):
@@ -37,20 +38,25 @@ class CrmLead(models.Model):
     )
 
     def _get_lead_purchase_order_domain(self):
-        return [("state", "not in", ("draft", "sent", "cancel"))]
+        return Domain("state", "not in", ("draft", "sent", "cancel"))
 
     def _get_lead_request_for_quotation_domain(self):
-        return [("state", "in", ("draft", "sent"))]
+        return Domain("state", "in", ("draft", "sent"))
+
+    def _get_purchase_order_lead_domain(self):
+        return Domain("opportunity_id", "in", self.ids)
 
     @api.depends("purchase_order_ids.state")
     def _compute_purchase_order_count(self):
         purchase_order_per_lead = {
             lead.id: count
             for lead, count in self.env["purchase.order"]._read_group(
-                domain=[
-                    ("opportunity_id", "in", self.ids),
-                    *self._get_lead_purchase_order_domain(),
-                ],
+                domain=Domain.AND(
+                    [
+                        self._get_purchase_order_lead_domain(),
+                        self._get_lead_purchase_order_domain(),
+                    ]
+                ),
                 groupby=["opportunity_id"],
                 aggregates=["__count"],
             )
@@ -63,10 +69,12 @@ class CrmLead(models.Model):
         rfq_per_lead = {
             lead.id: count
             for lead, count in self.env["purchase.order"]._read_group(
-                domain=[
-                    ("opportunity_id", "in", self.ids),
-                    *self._get_lead_request_for_quotation_domain(),
-                ],
+                domain=Domain.AND(
+                    [
+                        self._get_purchase_order_lead_domain(),
+                        self._get_lead_request_for_quotation_domain(),
+                    ]
+                ),
                 groupby=["opportunity_id"],
                 aggregates=["__count"],
             )
@@ -84,17 +92,15 @@ class CrmLead(models.Model):
     def _compute_purchase_amount_total(self):
         amount_per_lead = defaultdict(float)
 
-        for (
-            lead,
-            currency,
-            company,
-            date_order,
-            amount,
-        ) in self.env["purchase.order"]._read_group(
-            domain=[
-                ("opportunity_id", "in", self.ids),
-                *self._get_lead_purchase_order_domain(),
-            ],
+        for lead, currency, company, date_order, amount in self.env[
+            "purchase.order"
+        ]._read_group(
+            domain=Domain.AND(
+                [
+                    self._get_purchase_order_lead_domain(),
+                    self._get_lead_purchase_order_domain(),
+                ]
+            ),
             groupby=["opportunity_id", "currency_id", "company_id", "date_order:day"],
             aggregates=["amount_untaxed:sum"],
         ):
@@ -109,12 +115,14 @@ class CrmLead(models.Model):
         for lead in self:
             lead.purchase_amount_total = amount_per_lead.get(lead.id, 0.0)
 
-    def _create_customer(self):
+    def _create_customer(self, with_parent=None):
         """It can be a customer or supplier depending on lead request type"""
+        self.ensure_one()
         self = self.with_context(res_partner_search_mode=self.request_type)
-        return super()._create_customer()
+        return super()._create_customer(with_parent=with_parent)
 
     def action_lead_rfq_new(self):
+        self.ensure_one()
         if not self.partner_id:
             return self.env["ir.actions.actions"]._for_xml_id(
                 "srm.srm_rfq_partner_action"
@@ -123,6 +131,7 @@ class CrmLead(models.Model):
             return self.action_rfq_new()
 
     def action_rfq_new(self):
+        self.ensure_one()
         action = self.env["ir.actions.actions"]._for_xml_id("srm.action_lead_rfq_new")
         action["context"] = self._prepare_rfq_context()
         return action

@@ -10,30 +10,31 @@ class Opportunity2Rfq(models.TransientModel):
     _description = "Create new or use existing Supplier on new RFQ"
 
     @api.model
-    def default_get(self, fields):
-        result = super().default_get(fields)
+    def default_get(self, field_list):
+        result = super().default_get(field_list)
 
-        active_model = self.env.context.get("active_model")
-        if active_model != "crm.lead":
+        if self.env.context.get("active_model") != "crm.lead":
             raise UserError(self.env._("You can only apply this action from a lead."))
 
-        lead = False
-        if result.get("lead_id"):
-            lead = self.env["crm.lead"].browse(result["lead_id"])
-        elif "lead_id" in fields and self.env.context.get("active_id"):
-            lead = self.env["crm.lead"].browse(self.env.context["active_id"])
-        if lead:
+        lead = self.env["crm.lead"]
+        lead_id = result.get("lead_id") or (
+            self.env.context.get("active_id") if "lead_id" in field_list else False
+        )
+        if lead_id:
+            lead = self.env["crm.lead"].browse(lead_id)
             result["lead_id"] = lead.id
+
             partner_id = result.get("partner_id") or lead._find_matching_partner().id
-            if "action" in fields and not result.get("action"):
+
+            if "action" in field_list and not result.get("action"):
                 result["action"] = "exist" if partner_id else "create"
-            if "partner_id" in fields and not result.get("partner_id"):
+            if "partner_id" in field_list and not result.get("partner_id"):
                 result["partner_id"] = partner_id
 
         return result
 
     action = fields.Selection(
-        [
+        selection=[
             ("create", "Create a new vendor"),
             ("exist", "Link to an existing vendor"),
             ("nothing", "Do not link to a vendor"),
@@ -41,18 +42,19 @@ class Opportunity2Rfq(models.TransientModel):
         string="RFQ Vendor",
         required=True,
     )
-    lead_id = fields.Many2one("crm.lead", "Associated Lead", required=True)
-    partner_id = fields.Many2one("res.partner", "Vendor")
+    lead_id = fields.Many2one(
+        comodel_name="crm.lead", string="Associated Lead", required=True
+    )
+    partner_id = fields.Many2one(comodel_name="res.partner", string="Vendor")
 
     def action_apply(self):
-        """Convert lead to opportunity or merge lead and opportunity and open
-        the freshly created opportunity view.
-        """
+        """Create/link vendor if requested, then open the RFQ form."""
         self.ensure_one()
         if self.action == "create":
             self.lead_id._handle_partner_assignment(create_missing=True)
         elif self.action == "exist":
             self.lead_id._handle_partner_assignment(
-                force_partner_id=self.partner_id.id, create_missing=False
+                force_partner_id=self.partner_id.id,
+                create_missing=False,
             )
         return self.lead_id.action_rfq_new()
