@@ -11,6 +11,13 @@ class PurchaseOrder(models.Model):
         comodel_name="crm.lead",
         string="Opportunity",
         check_company=True,
-        domain="[('type', '=', 'opportunity'), ('request_type', '=', 'supplier'), "
-        "'|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+        domain="""
+            [
+                ('type', '=', 'opportunity'),
+                ('request_type', '=', 'supplier'),
+                '|',
+                ('company_id', '=', False),
+                ('company_id', '=', company_id),
+            ]
+        """,
     )

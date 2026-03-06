@@ -10,8 +10,11 @@
         <field
             name="domain"
         >[('type','=','opportunity'),('request_type','in',(False,'customer'))]</field>
-        <field
-            name="context"
-        >{'default_type': 'opportunity', 'default_request_type': 'customer', 'search_default_assigned_to_me': 1}</field>
+        <field name="context">{
+            'default_type': 'opportunity',
+            'search_default_assigned_to_me': 1,
+            'show_user_team_stages': 1,
+            'default_request_type': 'customer',
+        }</field>
     </record>
 </odoo>
