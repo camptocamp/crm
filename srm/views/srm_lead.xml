@@ -46,15 +46,6 @@
         </field>
     </record>
 
-    <record id="action_lead_rfq_new" model="ir.actions.act_window">
-        <field name="name">Lead RFQ new</field>
-        <field name="res_model">purchase.order</field>
-        <field name="view_mode">form</field>
-        <field
-            name="context"
-        >{'search_default_partner_id': id, 'default_partner_id': id}</field>
-    </record>
-
     <record id="crm_case_form_view_oppor" model="ir.ui.view">
         <field name="name">crm.lead.oppor.inherited.crm</field>
         <field name="model">crm.lead</field>
@@ -133,7 +124,7 @@
                                 options="{'currency_field': 'company_currency'}"
                             />
                         </span>
-                        <span class="o_stat_text"> Purchase Orders</span>
+                        <span class="o_stat_text">Purchase Orders</span>
                         <field name="purchase_order_count" invisible="1" />
                     </div>
                 </button>
@@ -159,11 +150,13 @@
         <field
             name="domain"
         >[('type','=','opportunity'), ('request_type','=', 'supplier')]</field>
-        <field name="context">{
+        <field name="context">
+            {
                 'default_type': 'opportunity',
                 'search_default_assigned_to_me': 1,
                 'default_request_type': 'supplier',
-        }</field>
+            }
+        </field>
         <field name="search_view_id" ref="crm.view_crm_case_opportunities_filter" />
     </record>
 
@@ -185,7 +178,8 @@
             name="domain"
         >['&amp;','|', ('type','=','lead'), ('type','=',False), ('request_type', '=', 'supplier')]</field>
         <field name="search_view_id" ref="crm.view_crm_case_leads_filter" />
-        <field name="context">{
+        <field name="context">
+            {
                 'default_type':'lead',
                 'default_request_type': 'supplier',
                 'search_default_type': 'lead',
@@ -201,7 +195,7 @@
         <field name="view_mode">pivot,graph,list</field>
         <field
             name="domain"
-        >['&amp;', ('request_type','=', 'supplier'),  '|', ('active','=',True), ('active','=',False)]</field>
+        >['&amp;', ('request_type','=', 'supplier'), '|', ('active','=',True), ('active','=',False)]</field>
         <field name="search_view_id" ref="crm.view_crm_case_leads_filter" />
         <field name="context" eval="{'search_default_filter_creation_date': 1}" />
     </record>
@@ -214,10 +208,11 @@
         <field
             name="context"
             eval="{
-            'list_view_ref': 'crm.crm_case_tree_view_oppor',
-            'default_type': 'opportunity',
-            'search_default_opportunity': True,
-            'search_default_filter_create_date': 1}"
+                   'list_view_ref': 'crm.crm_case_tree_view_oppor',
+                   'default_type': 'opportunity',
+                   'search_default_opportunity': True,
+                   'search_default_filter_create_date': 1
+               }"
         />
         <field name="search_view_id" ref="crm.crm_opportunity_report_view_search" />
     </record>

@@ -1,4 +1,4 @@
-# Copyright 2022 Telmo Santos <telmo.santos@camptocamp.com>
+# Copyright 2022 Camptocamp SA
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
 from odoo import api, fields, models
@@ -16,7 +16,7 @@ class CrmLead(models.Model):
     purchase_amount_total = fields.Monetary(
         compute="_compute_purchase_data",
         string="Sum of Purchase Orders",
-        help="Untaxed Total of Confirmed Orders",
+        help="Untaxed Total of Confirmed Purchase Orders",
         currency_field="company_currency",
     )
     request_for_quotation_count = fields.Integer(
@@ -26,7 +26,9 @@ class CrmLead(models.Model):
         compute="_compute_purchase_data", string="Number of Purchase Orders"
     )
     purchase_order_ids = fields.One2many(
-        "purchase.order", "opportunity_id", string="Purchase Orders"
+        comodel_name="purchase.order",
+        inverse_name="opportunity_id",
+        string="Purchase Orders",
     )
 
     @api.depends(
@@ -38,24 +40,31 @@ class CrmLead(models.Model):
     )
     def _compute_purchase_data(self):
         for lead in self:
-            total = 0.0
-            rfq_cnt = 0
-            purchase_order_cnt = 0
             company_currency = lead.company_currency or self.env.company.currency_id
-            for order in lead.purchase_order_ids:
-                if order.state in ("draft", "sent"):
-                    rfq_cnt += 1
-                if order.state not in ("draft", "sent", "cancel"):
-                    purchase_order_cnt += 1
-                    total += order.currency_id._convert(
-                        order.amount_untaxed,
-                        company_currency,
-                        order.company_id,
-                        order.date_order or fields.Date.today(),
-                    )
-            lead.purchase_amount_total = total
-            lead.request_for_quotation_count = rfq_cnt
-            lead.purchase_order_count = purchase_order_cnt
+            purchase_orders = lead.purchase_order_ids.filtered_domain(
+                self._get_lead_purchase_order_domain()
+            )
+            lead.purchase_amount_total = sum(
+                order.currency_id._convert(
+                    order.amount_untaxed,
+                    company_currency,
+                    order.company_id,
+                    order.date_order or fields.Date.today(),
+                )
+                for order in purchase_orders
+            )
+            lead.request_for_quotation_count = len(
+                lead.purchase_order_ids.filtered_domain(
+                    self._get_lead_request_for_quotation_domain()
+                )
+            )
+            lead.purchase_order_count = len(purchase_orders)
+
+    def _get_lead_purchase_order_domain(self):
+        return [("state", "not in", ("draft", "sent", "cancel"))]
+
+    def _get_lead_request_for_quotation_domain(self):
+        return [("state", "in", ("draft", "sent"))]
 
     def _create_customer(self):
         """It can be a customer or supplier depending on lead request type"""
@@ -72,10 +81,15 @@ class CrmLead(models.Model):
 
     def action_rfq_new(self):
         action = self.env["ir.actions.actions"]._for_xml_id("srm.action_lead_rfq_new")
-        action["context"] = {
+        action["context"] = self._prepare_rfq_context()
+        return action
+
+    def _prepare_rfq_context(self):
+        self.ensure_one()
+        rfq_context = {
             "default_partner_id": self.partner_id.id,
             "default_opportunity_id": self.id,
         }
         if self.user_id:
-            action["context"]["default_user_id"] = self.user_id.id
-        return action
+            rfq_context["default_user_id"] = self.user_id.id
+        return rfq_context
