@@ -1,0 +1,3 @@
+- \[Camptocamp SA\](<https://www.camptocamp.com>):
+  - Maksym Yankin \<<maksym.yankin@camptocamp.com>\>
+  - Silvio Gregorini \<<silvio.gregorini@camptocamp.com>\>
